@@ -269,22 +269,22 @@ Remarques :
 
 
 
-Multipart request pour l'envoi de fichiers
-==========================================
+Envoi de fichiers
+=================
 
 Gérer la réception de fichiers sur notre serveur
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Afin de gérer la réception de fichiers autres que le JSON, nous utiliserons la bibliothèque multer
+Afin de gérer la réception de fichiers autres que le JSON, nous utiliserons la bibliothèque multer.
 
 :code:`npm install --save multer`
 
 On créera également un dossier 'uploads' dans le répertoire de notre projet, puis nous configurerons un fichier :code:`server.js` :
 
 server.js
-^^^^^^
+^^^^^^^^^
 
-    code-block:: javascript
+.. code-block:: javascript
 
     var express = require('express')
     var multer  = require('multer')
@@ -312,6 +312,66 @@ server.js
         console.log("Working on port " + PORT);
     });
 
+Pour faire le test, commencez par lancer votre serveur : :code:`node server.js`
+
+Maintenant nous pouvons de nouveau utiliser postman.
+Choisissez la méthode POST, puis dans body changez le type de value à :code:`File`.
+Sélectionnez alors un fichier sur votre machine et envoyez la requête `<http://localhost:8080/upload/>`_.
+Le serveur devrait vous renvoyer "Merci !" peu importe le format de fichier que vous avez sélectionné, et théoriquement plusieurs fichiers peuvent être envoyés simultanément.
+
+Cependant selon les circonstances, nous préférons souvent fixer le format de fichier possible à l'envoi,
+nous allons donc modifier légèrement le code de :code:`server.js` pour fixer l'envoi d'un seul fichier et de format fixé.
+Pour ces modifications, l'ajout d'une ligne :code:`var path = require('path');` sera nécessaire.
+
+
+server.js
+^^^^^^^^^
+
+.. code-block:: javascript
+
+    var express = require('express')
+    var multer  = require('multer')
+    var path = require('path');
+
+    var storage = multer.diskStorage({
+        destination: function(req, file, callback) {
+            callback(null, './uploads');
+        },
+        filename: function(req, file, callback) {
+            callback(null,Date.now()+file.originalname);
+        }
+    })
+    var upload = multer({ storage: storage });
+
+    var app = express()
+
+    app
+        .get('/', (req, res)=> {
+            res.render('formulaire.ejs');
+        })
+        .post('/upload',function(req,res) {
+            var upload = multer({storage: storage, fileFilter: function (req, file, callback) { //ajout d'un filtre de format
+                    var ext = path.extname(file.originalname);
+                    if(ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') { //condition sur les formats acceptes
+                        return callback(new Error('Only images are allowed'))
+                    }
+                    callback(null, true)}
+            }).single('userFile');//methode any remplacee par single : un seul fichier à la fois
+
+            upload(req, res, function (err) {
+                if (err) {
+                    return res.end("Error uploading file.");
+                }
+                res.end("File is uploaded");
+            });
+        })
+
+    //Define port
+    const PORT = process.env.PORT || 8080;
+
+    app.listen(PORT,function(){
+        console.log("Working on port " + PORT);
+    });
 
 
 
