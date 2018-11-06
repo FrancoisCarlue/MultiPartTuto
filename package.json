@@ -1,0 +1,16 @@
+{
+  "name": "multiparttuto",
+  "version": "1.0.0",
+  "description": "multiPartTuto",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "multipart",
+    "post",
+    "server"
+  ],
+  "author": "Francois Carlue",
+  "license": "ISC"
+}
