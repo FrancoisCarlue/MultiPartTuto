@@ -267,3 +267,51 @@ Remarques :
 
   .. note:: on ne gère pas les cookies ici puisque c'est via la requète POST. Cela pourrait être à ajouter.
 
+
+
+Multipart request pour l'envoi de fichiers
+==========================================
+
+Gérer la réception de fichiers sur notre serveur
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Afin de gérer la réception de fichiers autres que le JSON, nous utiliserons la bibliothèque multer
+
+:code:`npm install --save multer`
+
+On créera également un dossier 'uploads' dans le répertoire de notre projet, puis nous configurerons un fichier :code:`server.js` :
+
+server.js
+^^^^^^
+
+    code-block:: javascript
+
+    var express = require('express')
+    var multer  = require('multer')
+
+    var storage = multer.diskStorage({
+        destination: function(req, file, callback) {
+            callback(null, './uploads'); //configuration du chemin pour la réception de nos fichiers
+        },
+        filename: function(req, file, callback) {
+            callback(null,Date.now()+file.originalname); //nomenclature de nos fichiers
+        }
+    })
+    var upload = multer({ storage: storage });
+
+    var app = express()
+
+    app.post('/upload', upload.any(), (req, res)=> { //on gère ici l'upload de n'importe quel type de fichier
+            res.end('Merci !');
+        });
+
+    //Define port
+    const PORT = process.env.PORT || 8080;
+
+    app.listen(PORT,function(){
+        console.log("Working on port " + PORT);
+    });
+
+
+
+
