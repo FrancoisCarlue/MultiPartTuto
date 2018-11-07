@@ -275,14 +275,15 @@ Envoi de fichiers
 Gérer la réception de fichiers sur notre serveur
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Afin de gérer la réception de fichiers autres que le JSON, nous utiliserons la bibliothèque multer.
+Afin de gérer la réception de fichiers autres que le JSON, nous utiliserons le middleware multer. Ce dernier va notamment
+nous permettre de gérer le :code:'multipart/form-data' essentiellement utilisé pour uploader des fichiers.
 
 :code:`npm install --save multer`
 
-On créera également un dossier 'uploads' dans le répertoire de notre projet, puis nous configurerons un fichier :code:`server.js` :
+On créera également un dossier 'uploads' dans le répertoire de notre projet, puis nous intégrerons au fichier :code:`app.js` le code suivant:
 
-server.js
-^^^^^^^^^
+app.js
+^^^^^^
 
 .. code-block:: javascript
 
@@ -305,14 +306,7 @@ server.js
             res.end('Merci !');
         });
 
-    //Define port
-    const PORT = process.env.PORT || 8080;
-
-    app.listen(PORT,function(){
-        console.log("Working on port " + PORT);
-    });
-
-Pour faire le test, commencez par lancer votre serveur : :code:`node server.js`
+Pour faire le test, commencez par lancer votre serveur : :code:`node app.js`
 
 Maintenant nous pouvons de nouveau utiliser postman.
 Choisissez la méthode POST, puis dans body changez le type de value à :code:`File`.
@@ -320,12 +314,12 @@ Sélectionnez alors un fichier sur votre machine et envoyez la requête `<http:/
 Le serveur devrait vous renvoyer "Merci !" peu importe le format de fichier que vous avez sélectionné, et théoriquement plusieurs fichiers peuvent être envoyés simultanément.
 
 Cependant selon les circonstances, nous préférons souvent fixer le format de fichier possible à l'envoi,
-nous allons donc modifier légèrement le code de :code:`server.js` pour fixer l'envoi d'un seul fichier et de format fixé.
+nous allons donc modifier légèrement le code de :code:`app.js` pour fixer l'envoi d'un seul fichier et de format fixé.
 Pour ces modifications, l'ajout d'une ligne :code:`var path = require('path');` sera nécessaire.
 
 
-server.js
-^^^^^^^^^
+app.js
+^^^^^^
 
 .. code-block:: javascript
 
@@ -345,18 +339,14 @@ server.js
 
     var app = express()
 
-    app
-        .get('/', (req, res)=> {
-            res.render('formulaire.ejs');
-        })
-        .post('/upload',function(req,res) {
+    app.post('/upload',function(req,res) {
             var upload = multer({storage: storage, fileFilter: function (req, file, callback) { //ajout d'un filtre de format
                     var ext = path.extname(file.originalname);
-                    if(ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') { //condition sur les formats acceptes
+                    if(ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') { //condition sur les formats acceptés
                         return callback(new Error('Only images are allowed'))
                     }
                     callback(null, true)}
-            }).single('userFile');//methode any remplacee par single : un seul fichier à la fois
+            }).single('userFile');//méthode any remplacée par single : un seul fichier à la fois, le nom du fichier est imposé
 
             upload(req, res, function (err) {
                 if (err) {
@@ -366,12 +356,12 @@ server.js
             });
         })
 
-    //Define port
-    const PORT = process.env.PORT || 8080;
+On peut alors refaire un test avec postman :
 
-    app.listen(PORT,function(){
-        console.log("Working on port " + PORT);
-    });
+* En sélectionnant un fichier du format .png,.jpg,.jpeg ou .gif l'upload devrait réussir et le serveur devrait renvoyer "File is uploaded".
+* Si on sélectionne tout autre format de fichier, le serveur renverra une erreur.
 
+Remarque :
+D'autres méthodes de :code:'multer' existent pour pouvoir limiter le nombre de d'upload acceptés simultanément, comme :code:'array(fileName[,maxcount])' au lieu de :code:'single(fileName)'.
 
 
