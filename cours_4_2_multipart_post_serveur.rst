@@ -313,7 +313,49 @@ Choisissez la méthode POST, puis dans body changez le type de value à :code:`F
 Sélectionnez alors un fichier sur votre machine et envoyez la requête `<http://localhost:8080/upload/>`_.
 Le serveur devrait vous renvoyer "Merci !" peu importe le format de fichier que vous avez sélectionné, et théoriquement plusieurs fichiers peuvent être envoyés simultanément.
 
-Cependant selon les circonstances, nous préférons souvent fixer le format de fichier possible à l'envoi,
+Faire l'essai avec un formulaire
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Pour envoyer des fichiers à notre serveur, il est possible de créer un formulaire très simple dans un front, nous utiliserons ici un ejs.
+Pour cela nous allons créer un répertoire "views" dans notre projet, puis un fichier :code:`formulaire.ejs`.
+Il nous faudra également installer ejs :
+
+:code:`npm install --save ejs`
+
+Voici comment se présente le formulaire dans notre ejs :
+
+formulaire.ejs
+^^^^^^
+
+.. code-block:: html
+
+    <form action="/upload" method="post" enctype="multipart/form-data"> // l'encodage multipart/form-data est ce qui est attendu par notre serveur
+        <input type="file" name="userFile"> //l'attribut "name" doit correspondre à ce que attend le serveur : c'est donc "userFile"
+            <br />
+        <input type="submit" value="OK" />
+    </form>
+
+Une fois le formulaire.ejs créé, il faut ajouter un routage à notre serveur pour pouvoir y accéder. Si nous voulons avoir le formulaire sur la page principale, voici le get à ajouter juste avant le post :
+
+app.js
+^^^^^^
+
+.. code-block:: javascript
+
+    app
+    .get('/', (req, res)=> {
+        res.render('formulaire.ejs'); //la page d'accueil renverra désormais vers formulaire.ejs
+    })
+    .post('/upload', upload.any(), (req, res)=> { //on gère ici l'upload de n'importe quel type de fichier
+            res.end('Merci !');
+        });
+
+On peut désormais tester en accéder à notre page d'accueil via le navigateur (URL `<http://localhost:8080/>`_. Un formulaire apparait et nous permet d'envoyer un fichier de notre machine.
+N'hésitez pas à vérifier que le fichier apparait ensuite dans le répertoire "uploads" de votre projet.
+
+Ajouter un filtre de format et de quantité
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Selon les circonstances, nous préférons souvent fixer le format de fichier possible à l'envoi,
 nous allons donc modifier légèrement le code de :code:`app.js` pour fixer l'envoi d'un seul fichier et de format fixé.
 Pour ces modifications, l'ajout d'une ligne :code:`var path = require('path');` sera nécessaire.
 
@@ -325,7 +367,7 @@ app.js
 
     var express = require('express')
     var multer  = require('multer')
-    var path = require('path');
+    var path = require('path'); // ligne ajoutée
 
     var storage = multer.diskStorage({
         destination: function(req, file, callback) {
@@ -361,7 +403,6 @@ On peut alors refaire un test avec postman :
 * En sélectionnant un fichier du format .png,.jpg,.jpeg ou .gif l'upload devrait réussir et le serveur devrait renvoyer "File is uploaded".
 * Si on sélectionne tout autre format de fichier, le serveur renverra une erreur.
 
-Remarque :
-D'autres méthodes de :code:'multer' existent pour pouvoir limiter le nombre de d'upload acceptés simultanément, comme :code:'array(fileName[,maxcount])' au lieu de :code:'single(fileName)'.
+Remarque : d'autres méthodes de :code:`multer` existent pour pouvoir limiter le nombre de d'upload acceptés simultanément, comme :code:`array(fileName[,maxcount])` au lieu de :code:`single(fileName)`.
 
 
