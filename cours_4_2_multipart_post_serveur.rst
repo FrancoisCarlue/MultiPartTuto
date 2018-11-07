@@ -329,7 +329,7 @@ formulaire.ejs
 .. code-block:: html
 
     <form action="/upload" method="post" enctype="multipart/form-data"> // l'encodage multipart/form-data est ce qui est attendu par notre serveur
-        <input type="file" name="userFile"> //l'attribut "name" doit correspondre à ce que attend le serveur : c'est donc "userFile"
+        <input type="file" name="userFile">
             <br />
         <input type="submit" value="OK" />
     </form>
@@ -345,7 +345,7 @@ app.js
     .get('/', (req, res)=> {
         res.render('formulaire.ejs'); //la page d'accueil renverra désormais vers formulaire.ejs
     })
-    .post('/upload', upload.any(), (req, res)=> { //on gère ici l'upload de n'importe quel type de fichier
+    .post('/upload', upload.any(), (req, res)=> {
             res.end('Merci !');
         });
 
@@ -388,7 +388,7 @@ app.js
                         return callback(new Error('Only images are allowed'))
                     }
                     callback(null, true)}
-            }).single('userFile');//méthode any remplacée par single : un seul fichier à la fois, le nom du fichier est imposé
+            }).single('userFile');//méthode any remplacée par single : un seul fichier à la fois, le nom du fichier est imposé ("userFile")
 
             upload(req, res, function (err) {
                 if (err) {
