@@ -276,7 +276,7 @@ Gérer la réception de fichiers sur notre serveur
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Afin de gérer la réception de fichiers autres que le JSON, nous utiliserons le middleware multer. Ce dernier va notamment
-nous permettre de gérer le :code:'multipart/form-data' essentiellement utilisé pour uploader des fichiers.
+nous permettre de gérer le :code:`multipart/form-data` essentiellement utilisé pour uploader des fichiers.
 
 :code:`npm install --save multer`
 
